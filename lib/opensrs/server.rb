@@ -7,10 +7,11 @@ module OpenSRS
   class BadResponse < StandardError; end
 
   class Server
-    attr_accessor :server, :username, :password, :key
+    attr_accessor :server, :username, :password, :key, :proxy
 
     def initialize(options = {})
       @server   = URI.parse(options[:server] || "https://rr-n1-tor.opensrs.net:55443/")
+      @proxy    = options[:proxy]
       @username = options[:username]
       @password = options[:password]
       @key      = options[:key]
@@ -54,12 +55,20 @@ module OpenSRS
     end
 
     def http
-      http = Net::HTTP.new(server.host, server.port)
-      http.use_ssl = (server.scheme == "https")
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      http
+      if proxy.present?        
+        p = URI.parse(proxy)
+        http = Net::HTTP::Proxy(p.host, p.port, p.user, p.password)
+        http.use_ssl = (server.scheme == "https")
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE        
+        http.start(server.host, server.port)
+      else
+        http = Net::HTTP.new(server.host, server.port)
+        http.use_ssl = (server.scheme == "https")
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        http
+      end    
     end
-
+    
     def server_path
       server.path.empty? ? '/' : server.path
     end

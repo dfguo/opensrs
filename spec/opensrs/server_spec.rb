@@ -30,6 +30,7 @@ describe OpenSRS::Server do
       http.should_receive(:post).with('/endpoint', xml, header).and_return double.as_null_object
       server.call
     end
+    
 
     it "parses the response" do
       xml_processor.should_receive(:parse).with(response.body)
