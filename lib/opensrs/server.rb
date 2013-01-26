@@ -55,7 +55,7 @@ module OpenSRS
     end
 
     def http
-      if proxy.present?        
+      if proxy.present?  
         p = URI.parse(proxy)
         http = Net::HTTP::Proxy(p.host, p.port, p.user, p.password)
         http.use_ssl = (server.scheme == "https")
